@@ -16,7 +16,7 @@
  * under the License.
  */
 
- //TODO:CHANGE CSV FILE HEADER NAMES
+//TODO:CHANGE CSV FILE HEADER NAMES
 
 package org.wso2.sp.tcp.server;
 
@@ -53,13 +53,15 @@ public class TCPServer {
     private static String logDir = "./tcp-client-results";
     //private static String filteredLogDir = "./filtered-results-tcp-4.0.0-M20";
     private static final int RECORD_WINDOW = 10000;
+    private static long totalEventCount = 0;
     private static long eventCountTotal = 0;
     private static long eventCount = 0;
     private static long timeSpent = 0;
     private static long totalTimeSpent = 0;
-   // private static long totalExperimentDuration = 0;
+    // private static long totalExperimentDuration = 0;
     private static long startTime = System.currentTimeMillis();
     private static boolean flag;
+    private static boolean firstLineFlag;
     private static long veryFirstTime = System.currentTimeMillis();
     private static Writer fstream = null;
     private static long outputFileTimeStamp;
@@ -75,7 +77,7 @@ public class TCPServer {
      */
     public static void main(String[] args) {
 
-       // totalExperimentDuration=60000;
+        // totalExperimentDuration=60000;
         try {
             File directory = new File(logDir);
             if (!directory.exists()) {
@@ -87,12 +89,12 @@ public class TCPServer {
             sequenceNumber = getLogFileSequenceNumber();
             outputFileTimeStamp = System.currentTimeMillis();
             fstream = new OutputStreamWriter(new FileOutputStream(new File(logDir + "/output-" +
-                                                                                   sequenceNumber + "-" +
+                    sequenceNumber + "-" +
 
-                                                                                   (outputFileTimeStamp)
-                                                                                   + ".csv")
-                                                                          .getAbsoluteFile()), StandardCharsets
-                                                     .UTF_8);
+                    (outputFileTimeStamp)
+                    + ".csv")
+                    .getAbsoluteFile()), StandardCharsets
+                    .UTF_8);
 
         } catch (IOException e) {
             log.error("Error while creating statistics output file, " + e.getMessage(), e);
@@ -107,7 +109,7 @@ public class TCPServer {
 
 
         final Attribute.Type[] types = new Attribute.Type[]{Attribute.Type.LONG,
-                                                            Attribute.Type.FLOAT};
+                Attribute.Type.FLOAT};
         TCPNettyServer tcpNettyServer = new TCPNettyServer();
 //        tcpNettyServer.addStreamListener(new LogStreamListener("UsageStream"));
 //        tcpNettyServer.addStreamListener(new StatisticsStreamListener(streamDefinition));
@@ -119,83 +121,132 @@ public class TCPServer {
 
             public void onMessage(byte[] message) {
                 onEvents(SiddhiEventConverter.toConvertToSiddhiEvents(ByteBuffer.wrap(message), types));
+
             }
+            //log.info("pol");
 
             public void onEvents(Event[] events) {
 
 
                 for (Event event : events) {
-                    long currentTime = System.currentTimeMillis();
 
-                    if (firstTupleTime == -1) {
-                        firstTupleTime = currentTime;
-                    }
-
-                    //TODO:Check percentile value
-                    long iijTimestamp = Long.parseLong(event.getData()[0].toString());
                     try {
-                        eventCount++;
-                        eventCountTotal++;
-                        timeSpent += (currentTime - iijTimestamp);
-                        
 
-                        if (eventCount % RECORD_WINDOW == 0) {
-                            totalTimeSpent += timeSpent;
-                            long value = currentTime - startTime;
+                        // We won't consider any data before warmup period
 
-                            if (value == 0) {
-                                value++;
 
+                        totalEventCount++;
+
+                        if (totalEventCount > 10000) {
+
+                            long currentTime = System.currentTimeMillis();
+
+                            if (firstTupleTime == -1) {
+                                firstTupleTime = currentTime;
                             }
 
-			    histogram2.recordValue((timeSpent)/eventCount);
-                            histogram.recordValue((totalTimeSpent) / eventCountTotal);
+                            //TODO:Check percentile value
+                            long iijTimestamp = Long.parseLong(event.getData()[0].toString());
 
-                            if (!flag) {
-                                flag = true;
-                                fstream.write("Id, Throughput in this window (events/second), Entire throughput " +
-                                                      "for the run (events/second), Total elapsed time(s), Average "
-                                                      + "latency "
-                                                      +
-                                                      "per event in this window(ms), Entire Average latency per event for the run(ms), Total "
-                                                      + "number"
-                                                      + " of "
-                                                      +
-                                                      "events received (non-atomic),"+ "AVG latency from start (90),"
-                                                      + "" + "AVG latency from start(95), " + "AVG latency from start "
-                                                      + "(99)," + "AVG latency in this "
-                                                      + "window(90)," + "AVG latency in this window(95),"
-                                                      + "AVG latency "
-                                                      + "in this window(99)");
-                                fstream.write("\r\n");
-                            }
+                            eventCount++;
+                            eventCountTotal++;
+                            timeSpent += (currentTime - iijTimestamp);
 
-                            fstream.write(
-                                    (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
-                                            ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
-                                            ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
-                                            / eventCount) +
-                                            "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
-                                            eventCountTotal+ "," + histogram.getValueAtPercentile(90.0) + "," + histogram
-                                            .getValueAtPercentile(95.0) + "," + histogram.getValueAtPercentile(99.0) + ","
-                                            + "" + histogram2.getValueAtPercentile(90.0) + ","
-                                            + "" + histogram2.getValueAtPercentile(95.0) + ","
-                                            + "" + histogram2.getValueAtPercentile(99.0));
-                            fstream.write("\r\n");
-                            fstream.flush();
-                            histogram2.reset();
 
-                            startTime = System.currentTimeMillis();
-                            eventCount = 0;
-                            timeSpent = 0;
+                            if (eventCount % RECORD_WINDOW == 0) {
+                                totalTimeSpent += timeSpent;
+                                long value = currentTime - startTime;
 
-                            if (!exitFlag) {
-                                log.info("Exit flag set");
-                                setCompletedFlag(sequenceNumber);
-                                exitFlag = true;
-                                //dataLoader.shutdown();
-                                //siddhiAppRuntime.shutdown();
+                                if (value == 0) {
+                                    value++;
 
+                                }
+
+                                histogram2.recordValue((timeSpent) / eventCount);
+                                histogram.recordValue((totalTimeSpent) / eventCountTotal);
+
+                                //
+
+
+                                if (!flag) {
+                                    flag = true;
+                                    fstream.write("Id, Throughput in this window (events/second), Entire throughput " +
+                                            "for the run (events/second), Total elapsed time(s), Average "
+                                            + "latency "
+                                            +
+                                            "per event in this window(ms), Entire Average latency per "
+                                            + "event for the run(ms), Total "
+                                            + "number"
+                                            + " of "
+                                            +
+                                            "events received (non-atomic),"
+                                            + "AVG latency from start (90),"
+                                            + "" + "AVG latency from start(95), "
+                                            + "AVG latency from start "
+                                            + "(99)," + "AVG latency in this "
+                                            + "window(90)," + "AVG latency in this window(95),"
+                                            + "AVG latency "
+                                            + "in this window(99)");
+                                    fstream.write("\r\n");
+                                }
+
+                                if (!firstLineFlag) {
+                                    firstLineFlag = true;
+                                   
+                                    fstream.write(
+                                            (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
+                                                    ((eventCountTotal * 1000) / (currentTime - firstTupleTime) + 1) + "," +
+                                                    ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
+                                                    / eventCount) +
+                                                    "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
+                                                    eventCountTotal + "," + histogram.getValueAtPercentile(90.0) + ","
+                                                    + histogram
+                                                    .getValueAtPercentile(95.0) + "," + histogram.getValueAtPercentile(99.0)
+                                                    + ","
+                                                    + "" + histogram2.getValueAtPercentile(90.0) + ","
+                                                    + "" + histogram2.getValueAtPercentile(95.0) + ","
+                                                    + "" + histogram2.getValueAtPercentile(99.0));
+                                    fstream.write("\r\n");
+                                } else {
+                                    fstream.write(
+                                            (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
+                                                    ((eventCountTotal * 1000) / (currentTime - firstTupleTime)) + "," +
+                                                    ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
+                                                    / eventCount) +
+                                                    "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
+                                                    eventCountTotal + "," + histogram.getValueAtPercentile(90.0) + ","
+                                                    + histogram
+                                                    .getValueAtPercentile(95.0) + "," + histogram.getValueAtPercentile(99.0)
+                                                    + ","
+                                                    + "" + histogram2.getValueAtPercentile(90.0) + ","
+                                                    + "" + histogram2.getValueAtPercentile(95.0) + ","
+                                                    + "" + histogram2.getValueAtPercentile(99.0));
+                                    fstream.write("\r\n");
+
+                                }
+
+                                fstream.flush();
+                                histogram2.reset();
+
+                                startTime = System.currentTimeMillis();
+                                eventCount = 0;
+                                timeSpent = 0;
+
+                                // log.info("exit");
+                                ///////////////////////////////////////////////////
+                                if (!exitFlag && totalEventCount == 10000000) {
+                                    log.info("Exit flag set");
+                                    setCompletedFlag(sequenceNumber);
+                                    exitFlag = true;
+                                    //log.info("lol");
+                                    generateReport();
+                                    tcpNettyServer.shutdownGracefully();
+                                    //System.exit(0);
+
+                                    //dataLoader.shutdown();
+                                    //siddhiAppRuntime.shutdown();
+
+                                }
                             }
 
                         }
@@ -207,14 +258,24 @@ public class TCPServer {
 
 
                 }
+                //log.info("finished");
+
                 log.info(events.length);
             }
 
-            public void onEvent(Event event) {
-                //  log.info("started");
-                log.info(event);
-            }
+            //log.info("yryry");
+
+
+//            public void onEvent(Event event) {
+//                //  log.info("started");
+//                log.info(event);
+//            }
+//
+
         });
+
+
+        log.info("finished");
 
         //preprocessPerformanceData();
         log.info("Done the experiment. Exiting the benchmark");
@@ -225,15 +286,25 @@ public class TCPServer {
         serverConfig.setPort(Integer.parseInt("9893"));
 
         tcpNettyServer.start(serverConfig);
+        //generateReport();
+
         try {
             log.info("Server started, it will shutdown in 100000 millis.");
             Thread.sleep(10000000);
+            //generateReport();
+
         } catch (InterruptedException e) {
         } finally {
+            log.info("test");
+            //serverConfig.channel().closeFuture().sync();
             tcpNettyServer.shutdownGracefully();
-        }
-    }
 
+        }
+
+
+        log.info("finished");
+
+    }
 
 
     /**
@@ -257,7 +328,7 @@ public class TCPServer {
             File sequenceFile = new File(logDir + "/sequence-number.txt");
             if (sequenceFile.exists()) {
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(logDir + "/sequence-number.txt"),
-                                                              Charset.forName("UTF-8")));
+                        Charset.forName("UTF-8")));
 
                 while ((sCurrentLine = br.readLine()) != null) {
                     results = Integer.parseInt(sCurrentLine);
@@ -326,6 +397,19 @@ public class TCPServer {
             log.error("Error when writing performance information" + e.getMessage(), e);
         }
         return 0;
+    }
+
+    /**
+     * This method generates the PDF by scanning through the preprocessed data.
+     * The report will be kept inside the
+     */
+    private static void generateReport() {
+        try {
+            Runtime.getRuntime().exec("python linechart.py");
+        } catch (IOException e) {
+            log.error(e);
+        }
+
     }
 
 }
