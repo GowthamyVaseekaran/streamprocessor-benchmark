@@ -40,7 +40,7 @@ import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionExc
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
 import org.wso2.carbon.databridge.core.AgentCallback;
 import org.wso2.carbon.databridge.core.DataBridge;
-import org.wso2.carbon.databridge.core.Utils.AgentSession;
+import org.wso2.carbon.databridge.core.utils.AgentSession;
 import org.wso2.carbon.databridge.core.definitionstore.InMemoryStreamDefinitionStore;
 import org.wso2.carbon.databridge.core.exception.DataBridgeException;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
@@ -54,18 +54,15 @@ import org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver;
  * Databridge Thrift Server which accepts Thrift/Binary events
  */
 public class DatabridgeTestServer {
-    private static final String STREAM_NAME = "org.wso2.esb.MediatorStatistics";
     private static final String VERSION = "1.3.0";
     private static final Logger log = Logger.getLogger(DatabridgeTestServer.class);
     private static long firstTupleTime = -1;
     private static String logDir = "./wso2events-client-results";
-    //private static String filteredLogDir = "./filtered-results-tcp-4.0.0-M20";
     private static final int RECORD_WINDOW = 10000;
     private static long eventCountTotal = 0;
     private static long eventCount = 0;
     private static long timeSpent = 0;
     private static long totalTimeSpent = 0;
-    // private static long totalExperimentDuration = 0;
     private static long startTime = System.currentTimeMillis();
     private static boolean flag;
     private static long veryFirstTime = System.currentTimeMillis();
@@ -73,8 +70,6 @@ public class DatabridgeTestServer {
     private static long outputFileTimeStamp;
     private static boolean exitFlag = false;
     private static int sequenceNumber = 0;
-    //private static final Histogram histogram = new Histogram(2);
-    //private static final Histogram histogram2 = new Histogram(2);
     private ThriftDataReceiver thriftDataReceiver;
     BinaryDataReceiver binaryDataReceiver;
     private InMemoryStreamDefinitionStore streamDefinitionStore;
@@ -110,6 +105,7 @@ public class DatabridgeTestServer {
         DatabridgeTestServer databridgeTestServer = new DatabridgeTestServer();
         databridgeTestServer.addStreamDefinition(STREAM_DEFN);
         databridgeTestServer.start(args[0], Integer.parseInt(args[1]), args[2]);
+	log.info(args[0]);
         Thread.sleep(100000000);
         databridgeTestServer.stop();
     }
@@ -118,7 +114,7 @@ public class DatabridgeTestServer {
     public void addStreamDefinition(String streamDefinitionStr)
             throws StreamDefinitionStoreException, MalformedStreamDefinitionException {
         StreamDefinition streamDefinition = EventDefinitionConverterUtils.convertFromJson(streamDefinitionStr);
-        getStreamDefinitionStore().saveStreamDefinitionToStore(streamDefinition, -1);
+        getStreamDefinitionStore().saveStreamDefinitionToStore(streamDefinition);
     }
 
     private InMemoryStreamDefinitionStore getStreamDefinitionStore() {
@@ -146,33 +142,17 @@ public class DatabridgeTestServer {
             public void destroyContext(AgentSession agentSession) {
 
             }
-
-            public int getTenantId(String id) {
-                return -1;
-            }
-
-            public String getTenantDomain(String id) {
-                return null;
-            }
         }, streamDefinitionStore, WSO2EventServerUtil.getDataBridgeConfigPath());
 
         thriftDataReceiver = new ThriftDataReceiver(receiverPort, databridge);
 
         databridge.subscribe(new AgentCallback() {
 
-            //public void definedStream(StreamDefinition streamDefinition) {
-           //     log.info("StreamDefinition " + streamDefinition);
-           // }
-
-            public void definedStream(StreamDefinition streamDefinition, int value) {
+            public void definedStream(StreamDefinition streamDefinition) {
                 log.info("StreamDefinition with int parameter " + streamDefinition);
             }
 
-            //public void removeStream(StreamDefinition streamDefinition) {
-            //    log.info("StreamDefinition remove " + streamDefinition);
-            //}
-
-            public void removeStream(StreamDefinition streamDefinition, int value) {
+            public void removeStream(StreamDefinition streamDefinition) {
                 log.info("StreamDefinition remove with int parameter " + streamDefinition);
             }
 
@@ -185,19 +165,9 @@ public class DatabridgeTestServer {
                         firstTupleTime = currentTime;
                     }
 
-                    //log.info(evt.getPayloadData());
-                    //  Event[] payLoadDataArray;
-                    //  for(Event e:payLoadDataArray){
-                    //
-                    //  }
-                    //log.info();
                     long iijTimestamp=Long.parseLong(evt.getPayloadData()[0].toString());
                     log.info("Time is"+" "+iijTimestamp);
-                    //  String[] a = events.toString().split("payloadData");
-                    //  String[] b = a[1].split(",");
-                    //  String[] c = b[0].split("\\[");
-                    //  String x = c[1];
-                    //  long iijTimestamp = Long.parseLong(x);
+
                     try {
                         eventCount++;
                         eventCountTotal++;
@@ -234,7 +204,7 @@ public class DatabridgeTestServer {
                                                       + "in this window(99)");
                                 fstream.write("\r\n");
                             }
-                            //log.info("sample"+eventCountTotal/RECORD_WINDOW);
+
                             fstream.write(
                                     (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
                                             ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
@@ -244,7 +214,6 @@ public class DatabridgeTestServer {
                                             eventCountTotal);
                             fstream.write("\r\n");
                             fstream.flush();
-                            //histogram2.reset();
 
                             startTime = System.currentTimeMillis();
                             eventCount = 0;
@@ -259,21 +228,11 @@ public class DatabridgeTestServer {
                             }
 
                         }
-                        //log.info(total_number_of_events_received);
                     } catch (Exception ex) {
                         log.error("Error while consuming event" + ex.getMessage(), ex);
                     }
-                    // onEvent(event);
-
-
-                    // for(String c:b){
-                    // log.info("c is"+c);
-                    // }
 
                     log.info("events are"+evt);
-                    //log.info("eventListSize=" + events.size() + " eventList " + evt + " for username " +
-                                    //  credentials.getUsername());
-
                 }
             }
 
@@ -392,6 +351,4 @@ public class DatabridgeTestServer {
         thriftDataReceiver.stop();
         log.info("Test Server Stopped");
     }
-
-
 }
