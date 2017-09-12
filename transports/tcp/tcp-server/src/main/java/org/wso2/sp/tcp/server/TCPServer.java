@@ -165,7 +165,7 @@ public class TCPServer {
                                 histogram2.recordValue((timeSpent) / eventCount);
                                 histogram.recordValue((totalTimeSpent) / eventCountTotal);
 
-                                //
+                                
 
 
                                 if (!flag) {
@@ -232,45 +232,33 @@ public class TCPServer {
                                 eventCount = 0;
                                 timeSpent = 0;
 
-                                // log.info("exit");
-                                ///////////////////////////////////////////////////
+                                
                                 if (!exitFlag && totalEventCount == 10000000) {
                                     log.info("Exit flag set");
                                     setCompletedFlag(sequenceNumber);
                                     exitFlag = true;
-                                    //log.info("lol");
+                                    
                                     generateReport();
                                     tcpNettyServer.shutdownGracefully();
-                                    //System.exit(0);
-
-                                    //dataLoader.shutdown();
-                                    //siddhiAppRuntime.shutdown();
-
+                                    
                                 }
                             }
 
                         }
-                        //log.info(total_number_of_events_received);
+                       
                     } catch (Exception ex) {
                         log.error("Error while consuming event" + ex.getMessage(), ex);
                     }
-                    // onEvent(event);
+                    
 
 
                 }
-                //log.info("finished");
-
+                
                 log.info(events.length);
             }
 
-            //log.info("yryry");
 
 
-//            public void onEvent(Event event) {
-//                //  log.info("started");
-//                log.info(event);
-//            }
-//
 
         });
 
@@ -405,7 +393,7 @@ public class TCPServer {
      */
     private static void generateReport() {
         try {
-            Runtime.getRuntime().exec("python linechart.py");
+            Runtime.getRuntime().exec("python chartGeneration/linechart.py");
         } catch (IOException e) {
             log.error(e);
         }

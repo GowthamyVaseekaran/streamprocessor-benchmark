@@ -59,6 +59,7 @@ public class DatabridgeTestServer {
     private static long firstTupleTime = -1;
     private static String logDir = "./wso2events-client-results";
     private static final int RECORD_WINDOW = 10000;
+    private static long totalEventCount = 0;
     private static long eventCountTotal = 0;
     private static long eventCount = 0;
     private static long timeSpent = 0;
@@ -159,78 +160,109 @@ public class DatabridgeTestServer {
             public void receive(List<Event> events, Credentials credentials) {
 
                 for (Event evt : events) {
-                    long currentTime = System.currentTimeMillis();
+                   
 
-                    if (firstTupleTime == -1) {
-                        firstTupleTime = currentTime;
-                    }
+                 try {
 
-                    long iijTimestamp=Long.parseLong(evt.getPayloadData()[0].toString());
-                    log.info("Time is"+" "+iijTimestamp);
-
-                    try {
-                        eventCount++;
-                        eventCountTotal++;
-                        timeSpent += (currentTime - iijTimestamp);
-                        log.info("event count is" + eventCount);
+                        // We won't consider any data before warmup period
 
 
-                        if (eventCount % RECORD_WINDOW == 0) {
-                            totalTimeSpent += timeSpent;
-                            long value = currentTime - startTime;
+                        totalEventCount++;
 
-                            if (value == 0) {
-                                value++;
+                        if (totalEventCount > 10000) {
 
+                            long currentTime = System.currentTimeMillis();
+
+                            if (firstTupleTime == -1) {
+                                firstTupleTime = currentTime;
                             }
-                            log.info(eventCount);
 
-                            if (!flag) {
 
-                                flag = true;
-                                fstream.write("Id, Throughput in this window (events/second), Entire throughput " +
-                                                      "for the run (events/second), Total elapsed time(s), Average "
-                                                      + "latency "
-                                                      +
-                                                      "per event (ms), Entire Average latency per event (ms), Total "
-                                                      + "number"
-                                                      + " of "
-                                                      +
-                                                      "events received (non-atomic)," + "AVG latency from start (90),"
-                                                      + "" + "AVG latency from start(95), " + "AVG latency from start "
-                                                      + "(99)," + "AVG latency in this "
-                                                      + "window(90)," + "AVG latency in this window(95),"
-                                                      + "AVG latency "
-                                                      + "in this window(99)");
+                            long iijTimestamp = Long.parseLong(evt.getPayloadData()[0].toString());
+                            log.info("Time is" + " " + iijTimestamp);
+
+                            eventCount++;
+                            eventCountTotal++;
+                            timeSpent += (currentTime - iijTimestamp);
+
+
+                            if (eventCount % RECORD_WINDOW == 0) {
+                                totalTimeSpent += timeSpent;
+                                long value = currentTime - startTime;
+
+                                if (value == 0) {
+                                    value++;
+
+                                }
+
+                                histogram2.recordValue((timeSpent) / eventCount);
+                                histogram.recordValue((totalTimeSpent) / eventCountTotal);
+
+                                
+
+
+                                if (!flag) {
+                                    flag = true;
+                                    fstream.write("Id, Throughput in this window (events/second), Entire throughput " +
+                                                          "for the run (events/second), Total elapsed time(s), Average "
+                                                          + "latency "
+                                                          +
+                                                          "per event in this window(ms), Entire Average latency per "
+                                                          + "event for the run(ms), Total "
+                                                          + "number"
+                                                          + " of "
+                                                          +
+                                                          "events received (non-atomic),"
+                                                          + "AVG latency from start (90),"
+                                                          + "" + "AVG latency from start(95), "
+                                                          + "AVG latency from start "
+                                                          + "(99)," + "AVG latency in this "
+                                                          + "window(90)," + "AVG latency in this window(95),"
+                                                          + "AVG latency "
+                                                          + "in this window(99)");
+                                    fstream.write("\r\n");
+                                }
+
+
+                                fstream.write(
+                                        (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
+                                                ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
+                                                ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
+                                                / eventCount) +
+                                                "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
+                                                eventCountTotal + "," + histogram.getValueAtPercentile(90.0) + ","
+                                                + histogram
+                                                .getValueAtPercentile(95.0) + "," + histogram.getValueAtPercentile(99.0)
+                                                + ","
+                                                + "" + histogram2.getValueAtPercentile(90.0) + ","
+                                                + "" + histogram2.getValueAtPercentile(95.0) + ","
+                                                + "" + histogram2.getValueAtPercentile(99.0));
                                 fstream.write("\r\n");
-                            }
+                                fstream.flush();
+                                histogram2.reset();
 
-                            fstream.write(
-                                    (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
-                                            ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
-                                            ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
-                                            / eventCount) +
-                                            "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
-                                            eventCountTotal);
-                            fstream.write("\r\n");
-                            fstream.flush();
+                                startTime = System.currentTimeMillis();
+                                eventCount = 0;
+                                timeSpent = 0;
 
-                            startTime = System.currentTimeMillis();
-                            eventCount = 0;
-                            timeSpent = 0;
-
-                            if (!exitFlag) {
-                                log.info("Exit flag set");
-                                setCompletedFlag(sequenceNumber);
-                                exitFlag = true;
+                                
+                                if (!exitFlag && totalEventCount == 10000000) {
+                                    log.info("Exit flag set");
+                                    setCompletedFlag(sequenceNumber);
+                                    exitFlag = true;
+                                    generateReport();
+                                    stop();
 
 
+                                }
                             }
 
                         }
+                        //log.info(total_number_of_events_received);
                     } catch (Exception ex) {
                         log.error("Error while consuming event" + ex.getMessage(), ex);
                     }
+
 
                     log.info("events are"+evt);
                 }
@@ -345,6 +377,19 @@ public class DatabridgeTestServer {
             log.error("Error when writing performance information" + e.getMessage(), e);
         }
         return 0;
+    }
+
+	/**
+     * This method generates the PDF by scanning through the preprocessed data.
+     * The report will be kept inside the
+     */
+    private static void generateReport() {
+        try {
+            Runtime.getRuntime().exec("python chartGeneration/linechart.py");
+        } catch (IOException e) {
+            log.error(e);
+        }
+
     }
 
     public void stop() {
