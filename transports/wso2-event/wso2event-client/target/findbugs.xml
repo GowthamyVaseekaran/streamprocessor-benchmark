@@ -1,2 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<BugCollection version='3.0.1' threshold='medium' effort='max'><Error></Error><Project><SrcDir>/home/gwthamy/projects/streamperf/git/streamprocessor-benchmarks/transports/wso2-event/wso2event-client/src/main/java</SrcDir><SrcDir>/home/gwthamy/projects/streamperf/git/streamprocessor-benchmarks/transports/wso2-event/wso2event-client/target/generated-sources/annotations</SrcDir><SrcDir>/home/gwthamy/projects/streamperf/git/streamprocessor-benchmarks/transports/wso2-event/wso2event-client/src/test/java</SrcDir></Project></BugCollection>
