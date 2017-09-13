@@ -70,8 +70,9 @@ public class Client {
 
             int numberOfEventsSent = 100000000;
             for (int i = 0; i < numberOfEventsSent; i++) {
-		            event.setPayloadData(new Object[]{System.currentTimeMillis(), rand.nextFloat()});
+		event.setPayloadData(new Object[]{System.currentTimeMillis(), rand.nextFloat()});
                 dataPublisher.publish(event);
+		log.info(event);
             }
 
             try {

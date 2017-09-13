@@ -388,7 +388,7 @@ public class DatabridgeTestServer {
      */
     private static void generateReport() {
         try {
-            Runtime.getRuntime().exec("python chartGeneration/linechart.py");
+            Runtime.getRuntime().exec("python /home/gwthamy/projects/streamperf/git/streamprocessor-benchmarks/chartGeneration/linechart.py");
         } catch (IOException e) {
             log.error(e);
         }
