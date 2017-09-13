@@ -15,11 +15,15 @@
 #  limitations under the License.
 # -----------------------------------------------------------------------------	
 CLASSPATH=.:target/classes:target/org.wso2.carbon.sp.parent-4.0.0-SNAPSHOT-jar-with-dependencies.jar
+
 JAVA_OPTS="-Xmx8g -Xms8g"
+
 
 HOST="localhost"
 PORT="7612"
 PROTOCOL='thrift'
 FULL_EXPERIMENT_EVENTS=1000
 WARM_UP_EVENTS=100
-java $JAVA_OPTS -cp $CLASSPATH org.wso2.carbon.sample.server.DatabridgeTestServer $HOST $PORT $PROTOCOL $FULL_EXPERIMENT_EVENTS $WARM_UP_EVENTS
+
+java $JAVA_OPTS -cp $CLASSPATH org.wso2.carbon.sample.server.DatabridgeTestServer $HOST $PORT $PROTOCOL $FULL_EXPERIMENT_EVENTS $WARM_UP_EVENTS & sh /home/gwthamy/Software/wso2sp-4.0.0-SNAPSHOT/bin/worker.sh
+

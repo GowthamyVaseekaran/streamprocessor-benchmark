@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.sample.server;
 
+import org.HdrHistogram.Histogram;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,6 +72,8 @@ public class DatabridgeTestServer {
     private static long outputFileTimeStamp;
     private static boolean exitFlag = false;
     private static int sequenceNumber = 0;
+    private static final Histogram histogram = new Histogram(2);
+    private static final Histogram histogram2 = new Histogram(2);
     private ThriftDataReceiver thriftDataReceiver;
     BinaryDataReceiver binaryDataReceiver;
     private InMemoryStreamDefinitionStore streamDefinitionStore;
@@ -230,13 +233,13 @@ public class DatabridgeTestServer {
                                                 ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
                                                 / eventCount) +
                                                 "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
-                                                eventCountTotal + "," + histogram.getValueAtPercentile(90.0) + ","
+                                                eventCountTotal + "," + histogram.getValueAtPercentile(90) + ","
                                                 + histogram
-                                                .getValueAtPercentile(95.0) + "," + histogram.getValueAtPercentile(99.0)
+                                                .getValueAtPercentile(95) + "," + histogram.getValueAtPercentile(99)
                                                 + ","
-                                                + "" + histogram2.getValueAtPercentile(90.0) + ","
-                                                + "" + histogram2.getValueAtPercentile(95.0) + ","
-                                                + "" + histogram2.getValueAtPercentile(99.0));
+                                                + "" + histogram2.getValueAtPercentile(90) + ","
+                                                + "" + histogram2.getValueAtPercentile(95) + ","
+                                                + "" + histogram2.getValueAtPercentile(99));
                                 fstream.write("\r\n");
                                 fstream.flush();
                                 histogram2.reset();
@@ -259,7 +262,7 @@ public class DatabridgeTestServer {
 
                         }
                         //log.info(total_number_of_events_received);
-                    } catch (Exception ex) {
+                    } catch (IOException ex) {
                         log.error("Error while consuming event" + ex.getMessage(), ex);
                     }
 
