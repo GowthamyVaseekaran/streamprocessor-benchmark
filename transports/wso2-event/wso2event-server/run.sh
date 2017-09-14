@@ -15,9 +15,7 @@
 #  limitations under the License.
 # -----------------------------------------------------------------------------	
 CLASSPATH=.:target/classes:target/org.wso2.carbon.sp.parent-4.0.0-SNAPSHOT-jar-with-dependencies.jar
-
 JAVA_OPTS="-Xmx8g -Xms8g"
-
 
 HOST="localhost"
 PORT="7612"

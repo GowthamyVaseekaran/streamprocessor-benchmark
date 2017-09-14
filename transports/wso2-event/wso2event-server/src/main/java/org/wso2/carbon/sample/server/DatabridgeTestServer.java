@@ -19,6 +19,7 @@
 package org.wso2.carbon.sample.server;
 
 import org.HdrHistogram.Histogram;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.Event;
@@ -109,7 +111,7 @@ public class DatabridgeTestServer {
         DatabridgeTestServer databridgeTestServer = new DatabridgeTestServer();
         databridgeTestServer.addStreamDefinition(STREAM_DEFN);
         databridgeTestServer.start(args[0], Integer.parseInt(args[1]), args[2]);
-	log.info(args[0]);
+        log.info(args[0]);
         Thread.sleep(100000000);
         databridgeTestServer.stop();
     }
@@ -163,9 +165,9 @@ public class DatabridgeTestServer {
             public void receive(List<Event> events, Credentials credentials) {
 
                 for (Event evt : events) {
-                   
 
-                 try {
+
+                    try {
 
                         // We won't consider any data before warmup period
 
@@ -200,8 +202,6 @@ public class DatabridgeTestServer {
 
                                 histogram2.recordValue((timeSpent) / eventCount);
                                 histogram.recordValue((totalTimeSpent) / eventCountTotal);
-
-                                
 
 
                                 if (!flag) {
@@ -248,7 +248,7 @@ public class DatabridgeTestServer {
                                 eventCount = 0;
                                 timeSpent = 0;
 
-                                
+
                                 if (!exitFlag && totalEventCount == 10000000) {
                                     log.info("Exit flag set");
                                     setCompletedFlag(sequenceNumber);
@@ -267,7 +267,7 @@ public class DatabridgeTestServer {
                     }
 
 
-                    log.info("events are"+evt);
+                    log.info("events are" + evt);
                 }
             }
 
@@ -382,13 +382,15 @@ public class DatabridgeTestServer {
         return 0;
     }
 
-	/**
+    /**
      * This method generates the PDF by scanning through the preprocessed data.
      * The report will be kept inside the
      */
     private static void generateReport() {
         try {
-            Runtime.getRuntime().exec("python /home/gwthamy/projects/streamperf/git/streamprocessor-benchmarks/chartGeneration/linechart.py");
+            Runtime.getRuntime()
+                    .exec("python /home/gwthamy/projects/streamperf/git/streamprocessor-benchmarks/chartGeneration"
+                                  + "/linechart.py");
         } catch (IOException e) {
             log.error(e);
         }

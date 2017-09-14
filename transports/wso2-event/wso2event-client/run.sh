@@ -19,7 +19,7 @@ JAVA_OPTS="-Xmx8g -Xms8g"
 
 PROTOCOL='thrift'
 HOST="localhost"
-PORT="7611"
+PORT="7612"
 USERNAME="admin"
 PASSWORD="admin"
 

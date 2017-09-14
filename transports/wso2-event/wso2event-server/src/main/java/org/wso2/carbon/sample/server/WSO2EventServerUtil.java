@@ -29,8 +29,9 @@ public class WSO2EventServerUtil {
         File filePath = new File("src" + File.separator + "main" + File.separator + "resources");
         if (!filePath.exists()) {
             filePath = new File("modules" + File.separator + "samples" + File.separator +
-                    "sample-clients" + File.separator + "wso2event-server" + File.separator + "src" +
-                    File.separator + "main" + File.separator + "resources");
+                                        "sample-clients" + File.separator + "wso2event-server" + File.separator + "src"
+                                        +
+                                        File.separator + "main" + File.separator + "resources");
         }
         if (!filePath.exists()) {
             filePath = new File("resources");
@@ -47,8 +48,9 @@ public class WSO2EventServerUtil {
         File filePath = new File("src" + File.separator + "main" + File.separator + "resources");
         if (!filePath.exists()) {
             filePath = new File("modules" + File.separator + "samples" + File.separator +
-                    "sample-clients" + File.separator + "wso2event-server" + File.separator + "src" +
-                    File.separator + "main" + File.separator + "resources");
+                                        "sample-clients" + File.separator + "wso2event-server" + File.separator + "src"
+                                        +
+                                        File.separator + "main" + File.separator + "resources");
         }
         if (!filePath.exists()) {
             filePath = new File("resources");
