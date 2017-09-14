@@ -42,7 +42,6 @@ public class DataPublisherUtil {
         String trustStore = filePath.getAbsolutePath();
         System.setProperty("javax.net.ssl.trustStore", trustStore + File.separator + "client-truststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-
     }
 
     public static void setKeyStoreParams() {

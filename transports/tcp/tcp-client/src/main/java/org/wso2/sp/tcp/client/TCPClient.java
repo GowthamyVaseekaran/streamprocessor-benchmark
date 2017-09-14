@@ -49,11 +49,6 @@ public class TCPClient {
      * @param args host and port need to be provided as args
      */
     public static void main(String[] args) throws IOException, ConnectionUnavailableException {
-        /*
-         * Stream definition:
-         * SmartHomeData (id string, value float, property bool, plugId int, householdId int, houseId int,
-         *      currentTime string)
-         */
         TCPNettyClient tcpNettyClient = new TCPNettyClient();
         tcpNettyClient.connect("localhost", Integer.parseInt("9893"));
         LOG.info("TCP client connected");
@@ -67,11 +62,8 @@ public class TCPClient {
             ArrayList<Event> arrayList = new ArrayList<Event>(BATCH_SIZE);
             for (int j = 0; j < BATCH_SIZE; j++) {
 
-                //Random rand=new Random();
                 iij_timestamp = System.currentTimeMillis();
-                // LOG.info(iij_timestamp);
                 value = ThreadLocalRandom.current().nextFloat();
-                //LOG.info(value);
                 arrayList.add(new Event(System.currentTimeMillis(), new Object[]{iij_timestamp,
                                                                                  value}));
             }

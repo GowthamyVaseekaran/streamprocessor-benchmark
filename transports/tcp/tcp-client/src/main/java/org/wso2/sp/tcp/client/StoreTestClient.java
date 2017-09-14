@@ -42,10 +42,6 @@ public class StoreTestClient {
      * @param args host and port need to be provided as args
      */
     public static void main(String[] args) throws IOException, ConnectionUnavailableException {
-        /*
-         * Stream definition:
-         * TestData (property bool)
-         */
         TCPNettyClient tcpNettyClient = new TCPNettyClient();
         tcpNettyClient.connect(args[0], Integer.parseInt(args[1]));
         LOG.info("TCP client for Store Test connected");
