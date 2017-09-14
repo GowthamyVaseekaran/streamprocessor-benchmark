@@ -56,9 +56,9 @@ public class Client {
 
             AgentHolder.setConfigPath(DataPublisherUtil.getDataAgentConfigPath(agentConfigFileName));
             DataPublisher dataPublisher = new DataPublisher(protocol, "tcp://" + host + ":" + port,
-                    "ssl://" + host + ":" + sslPort, username, password);
+                                                            "ssl://" + host + ":" + sslPort, username, password);
 
-	    Random rand = new Random();
+            Random rand = new Random();
 
             Event event = new Event();
             event.setStreamId(STREAM_ID);
@@ -67,12 +67,11 @@ public class Client {
             //event.setPayloadData(new Object[]{System.currentTimeMillis(), rand.nextFloat()});
 
 
-
             int numberOfEventsSent = 100000000;
             for (int i = 0; i < numberOfEventsSent; i++) {
-		event.setPayloadData(new Object[]{System.currentTimeMillis(), rand.nextFloat()});
+                event.setPayloadData(new Object[]{System.currentTimeMillis(), rand.nextFloat()});
                 dataPublisher.publish(event);
-		log.info(event);
+                log.info(event);
             }
 
             try {

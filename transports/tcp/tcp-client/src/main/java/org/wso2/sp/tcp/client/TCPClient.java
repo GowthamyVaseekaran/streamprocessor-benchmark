@@ -58,7 +58,7 @@ public class TCPClient {
         tcpNettyClient.connect("localhost", Integer.parseInt("9893"));
         LOG.info("TCP client connected");
 
-       
+
         long iij_timestamp;
         float value;
 
@@ -66,22 +66,22 @@ public class TCPClient {
         for (; i < EVENT_COUNT; i += BATCH_SIZE) {
             ArrayList<Event> arrayList = new ArrayList<Event>(BATCH_SIZE);
             for (int j = 0; j < BATCH_SIZE; j++) {
-	
-		//Random rand=new Random();
-		iij_timestamp=System.currentTimeMillis();
-               // LOG.info(iij_timestamp);
+
+                //Random rand=new Random();
+                iij_timestamp = System.currentTimeMillis();
+                // LOG.info(iij_timestamp);
                 value = ThreadLocalRandom.current().nextFloat();
-		//LOG.info(value);
+                //LOG.info(value);
                 arrayList.add(new Event(System.currentTimeMillis(), new Object[]{iij_timestamp,
-                        value}));
+                                                                                 value}));
             }
-	    LOG.info(arrayList);
+            LOG.info(arrayList);
             tcpNettyClient.send(STREAM_NAME, BinaryEventConverter.convertToBinaryMessage(
                     arrayList.toArray(new Event[0]), TYPES).array());
         }
         LOG.info("TCP client finished sending events");
         try {
-        LOG.info("TCP client finished sending events");
+            LOG.info("TCP client finished sending events");
             Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
