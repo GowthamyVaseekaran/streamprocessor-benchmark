@@ -50,14 +50,12 @@ public class TCPServer {
     static Logger log = Logger.getLogger(TCPServer.class);
     private static long firstTupleTime = -1;
     private static String logDir = "./tcp-client-results";
-    //private static String filteredLogDir = "./filtered-results-tcp-4.0.0-M20";
     private static final int RECORD_WINDOW = 10000;
     private static long totalEventCount = 0;
     private static long eventCountTotal = 0;
     private static long eventCount = 0;
     private static long timeSpent = 0;
     private static long totalTimeSpent = 0;
-    // private static long totalExperimentDuration = 0;
     private static long startTime = System.currentTimeMillis();
     private static boolean flag;
     private static boolean firstLineFlag;
@@ -76,7 +74,6 @@ public class TCPServer {
      */
     public static void main(String[] args) {
 
-        // totalExperimentDuration=60000;
         try {
             File directory = new File(logDir);
             if (!directory.exists()) {
@@ -98,10 +95,7 @@ public class TCPServer {
         } catch (IOException e) {
             log.error("Error while creating statistics output file, " + e.getMessage(), e);
         }
-        /*
-         * Stream definition:
-         * OutStream (houseId int, maxVal float, minVal float, avgVal double);
-         */
+
         final StreamDefinition streamDefinition = StreamDefinition.id("TCP_Benchmark")
                 .attribute("iij_timestamp", Attribute.Type.LONG)
                 .attribute("value", Attribute.Type.FLOAT);
@@ -110,8 +104,6 @@ public class TCPServer {
         final Attribute.Type[] types = new Attribute.Type[]{Attribute.Type.LONG,
                                                             Attribute.Type.FLOAT};
         TCPNettyServer tcpNettyServer = new TCPNettyServer();
-//        tcpNettyServer.addStreamListener(new LogStreamListener("UsageStream"));
-//        tcpNettyServer.addStreamListener(new StatisticsStreamListener(streamDefinition));
         tcpNettyServer.addStreamListener(new StreamListener() {
 
             public String getChannelId() {
@@ -120,36 +112,24 @@ public class TCPServer {
 
             public void onMessage(byte[] message) {
                 onEvents(SiddhiEventConverter.toConvertToSiddhiEvents(ByteBuffer.wrap(message), types));
-
             }
-            //log.info("pol");
 
             public void onEvents(Event[] events) {
-
-
                 for (Event event : events) {
-
-
                     try {
 
                         // We won't consider any data before warmup period
-
-
                         totalEventCount++;
 
 
                         if (totalEventCount > 10000) {
-
-
                             long currentTime = System.currentTimeMillis();
 
                             if (firstTupleTime == -1) {
                                 firstTupleTime = currentTime;
                             }
 
-                            //TODO:Check percentile value
                             long iijTimestamp = Long.parseLong(event.getData()[0].toString());
-
 
                             eventCount++;
                             eventCountTotal++;
@@ -169,7 +149,6 @@ public class TCPServer {
                                 histogram.recordValue((totalTimeSpent) / eventCountTotal);
                                 throughputHistogram.recordValue(eventCount * 1000 / value);
                                 totalEvtsPerRun += eventCount * 1000 / value;
-
 
                                 if (!flag) {
                                     flag = true;
@@ -197,8 +176,6 @@ public class TCPServer {
 
                                 if (!firstLineFlag) {
                                     firstLineFlag = true;
-                                    //  fstream.write
-                                    // ("--------------------------------------------------------------------");
                                     fstream.write(
                                             (eventCountTotal / RECORD_WINDOW) + "," + (eventCount * 1000 / value) + ","
                                                     +
@@ -261,48 +238,36 @@ public class TCPServer {
                             }
 
                         }
-                        //log.info(total_number_of_events_received);
                     } catch (Exception ex) {
                         log.error("Error while consuming event" + ex.getMessage(), ex);
                     }
                 }
-
                 log.info(events.length);
             }
-
-
         });
 
 
         log.info("finished");
-
-        //preprocessPerformanceData();
         log.info("Done the experiment. Exiting the benchmark");
-
 
         ServerConfig serverConfig = new ServerConfig();
         serverConfig.setHost("localhost");
         serverConfig.setPort(Integer.parseInt("9893"));
 
         tcpNettyServer.start(serverConfig);
-        //generateReport();
 
         try {
-            log.info("Server started, it will shutdown in 100000 millis.");
+            log.info("Server started, it will shutdown in 10000000 millis.");
             Thread.sleep(10000000);
             //generateReport();
 
         } catch (InterruptedException e) {
         } finally {
             log.info("test");
-            //serverConfig.channel().closeFuture().sync();
             tcpNettyServer.shutdownGracefully();
-
         }
 
-
         log.info("finished");
-
     }
 
 
@@ -408,7 +373,5 @@ public class TCPServer {
         } catch (IOException e) {
             log.error(e);
         }
-
     }
-
 }

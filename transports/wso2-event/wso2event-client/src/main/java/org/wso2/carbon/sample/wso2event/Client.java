@@ -64,8 +64,6 @@ public class Client {
             event.setStreamId(STREAM_ID);
             event.setMetaData(null);
             event.setCorrelationData(null);
-            //event.setPayloadData(new Object[]{System.currentTimeMillis(), rand.nextFloat()});
-
 
             int numberOfEventsSent = 100000000;
             for (int i = 0; i < numberOfEventsSent; i++) {
@@ -86,5 +84,4 @@ public class Client {
             log.error(e);
         }
     }
-
 }
