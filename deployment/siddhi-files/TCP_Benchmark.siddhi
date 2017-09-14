@@ -1,9 +1,0 @@
-@App:name("SiddhiApp")
-
-@source(type = 'tcp', context='inputStream',@map(type='binary')) 
-define stream inputStream (iij_timestamp long,value float);
-@sink(type='tcp',url='tcp://localhost:9893/inputStream',sync='true', @map(type='binary')) 
-define stream outputStream (iij_timestamp long,value float);
-from inputStream
-select iij_timestamp,value
-insert into outputStream;
