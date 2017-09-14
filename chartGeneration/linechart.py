@@ -10,9 +10,10 @@ total_throughput=[]
 latency=[]
 total_latency=[]
 percentile_90=[]
-
+percentile_99=[]
+counter=0
 directory="/home/gwthamy/Software/wso2sp-4.0.0-SNAPSHOT/samples/sample-clients/tcp-server/tcp-client-results"
-
+#need to change this path
 filepath=max(glob.iglob("/home/gwthamy/Software/wso2sp-4.0.0-SNAPSHOT/samples/sample-clients/tcp-server/tcp-client-results/*.csv"), key=os.path.getmtime)
 #filepath="/home/gwthamy/Software/wso2sp-4.0.0-SNAPSHOT/samples/sample-clients/tcp-server/tcp-client-results/output-54-1505302223953.csv"
 # loop through each csv file in the specific folder
@@ -33,17 +34,22 @@ def file_read(filepath,start,end):
 
 
 	for line in content:
+		global counter
+		if counter==0:
+			counter=float(line.split(",")[5])
+
 		line=line.strip()
 		data=line.split(",")[1]
-		data2=line.split(",")[5]
+		data2=float(line.split(",")[5])
 		data3=line.split(",")[2]
 		latency_data=line.split(",")[6]
 		total_latency_data=line.split(",")[7]
 		percentile90=line.split(",")[3]
+		percentile99=line.split(",")[4]
 		
 		float_throughput_data = float(data)
 		thousands_throughput=float_throughput_data/1000
-		float_id=float(data2)
+		float_id=data2-counter
 		throughput.append(thousands_throughput)
 		time.append(float_id)
 		total_throughput_values=float(data3)/1000
@@ -54,14 +60,17 @@ def file_read(filepath,start,end):
 		total_latency.append(float_total_latency)
 		float_percentile90=float(percentile90)/1000
 		percentile_90.append(float_percentile90)
+		float_percentile99=float(percentile99)/1000
+		percentile_99.append(float_percentile99)
 
 
 length=len(throughput)
 #String=str(length)
 
 print length
-
-
+for x in time:
+	print x
+#need to change the path
 throughput_image_dir=("/home/gwthamy/Software/wso2sp-4.0.0-SNAPSHOT/samples/sample-clients/tcp-server/outputGraphs/throughput_graph/output-.{}.png".format(get_all_files(directory)-1))
 latency_image_dir=("/home/gwthamy/Software/wso2sp-4.0.0-SNAPSHOT/samples/sample-clients/tcp-server/outputGraphs/latency_Graph/output-.{}.png".format(get_all_files(directory)-1))
 
@@ -86,6 +95,7 @@ def drawChart(start,end):
 	y=np.array([throughput])
 	z=np.array([total_throughput])
 	a=np.array([percentile_90])
+	b=np.array([percentile_99])
 
 
 	plt.ylabel("Throughput(thousands events/second)");
@@ -99,6 +109,8 @@ def drawChart(start,end):
 	plt.plot(x,z,"x",color='red')
 	plt.plot(time,percentile_90,color='green',label='90th percentile for throughput in this window')
 	plt.plot(x,a,"*",color='green')
+	plt.plot(time,percentile_99,color='black',label='99th percentile for throughput in this window')
+        plt.plot(x,b,".",color='black')
 	plt.legend()
 
 	#plt.show()
@@ -135,4 +147,3 @@ def drawChart(start,end):
 
 
 drawChart(2,101)
-
