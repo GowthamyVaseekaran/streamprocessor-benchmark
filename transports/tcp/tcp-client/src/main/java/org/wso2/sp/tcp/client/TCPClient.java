@@ -36,24 +36,30 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Test client for TCP source
  */
-public class TCPClient {
-    static final int EVENT_COUNT = 100000000;
-    static final int BATCH_SIZE = 10;
-    static final String STREAM_NAME = "TCP_Benchmark";
-    static final Attribute.Type[] TYPES = new Attribute.Type[]{Attribute.Type.LONG, Attribute.Type.FLOAT};
-    static final Logger LOG = Logger.getLogger(TCPClient.class);
+public class TCPClient extends Thread{
+    static final long EVENT_COUNT = 10000000L;
+    //static final int EVENT_COUNT = 1000;
+    final int BATCH_SIZE = 10;
+    final String STREAM_NAME = "TCP_Benchmark";
+    final Attribute.Type[] TYPES = new Attribute.Type[]{Attribute.Type.LONG, Attribute.Type.FLOAT};
+    final Logger LOG = Logger.getLogger(TCPClient.class);
 
     /**
      * Main method to start the test client
      *
-     * @param args host and port need to be provided as args
      */
-    public static void main(String[] args) throws IOException, ConnectionUnavailableException {
+    public void run() {
+	try{
+        /*
+         * Stream definition:
+         * SmartHomeData (id string, value float, property bool, plugId int, householdId int, houseId int,
+         *      currentTime string)
+         */
         TCPNettyClient tcpNettyClient = new TCPNettyClient();
         tcpNettyClient.connect("localhost", Integer.parseInt("9893"));
         LOG.info("TCP client connected");
 
-
+       
         long iij_timestamp;
         float value;
 
@@ -61,24 +67,32 @@ public class TCPClient {
         for (; i < EVENT_COUNT; i += BATCH_SIZE) {
             ArrayList<Event> arrayList = new ArrayList<Event>(BATCH_SIZE);
             for (int j = 0; j < BATCH_SIZE; j++) {
-
-                iij_timestamp = System.currentTimeMillis();
+	
+		//Random rand=new Random();
+		iij_timestamp=System.currentTimeMillis();
+               // LOG.info(iij_timestamp);
                 value = ThreadLocalRandom.current().nextFloat();
+		//LOG.info(value);
                 arrayList.add(new Event(System.currentTimeMillis(), new Object[]{iij_timestamp,
-                                                                                 value}));
+                        value}));
             }
-            LOG.info(arrayList);
+	    LOG.info(arrayList);
             tcpNettyClient.send(STREAM_NAME, BinaryEventConverter.convertToBinaryMessage(
                     arrayList.toArray(new Event[0]), TYPES).array());
         }
         LOG.info("TCP client finished sending events");
         try {
-            LOG.info("TCP client finished sending events");
+        LOG.info("TCP client finished sending events");
             Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
         tcpNettyClient.disconnect();
         tcpNettyClient.shutdown();
+	}catch(ConnectionUnavailableException ex){
+		LOG.error(ex);
+	}catch(IOException e){
+		LOG.error(e);
+	}
     }
 
     private static String getCurrentTimestamp() {
@@ -86,4 +100,5 @@ public class TCPClient {
         Date date = new Date();
         return dateFormat.format(date);
     }
+    
 }

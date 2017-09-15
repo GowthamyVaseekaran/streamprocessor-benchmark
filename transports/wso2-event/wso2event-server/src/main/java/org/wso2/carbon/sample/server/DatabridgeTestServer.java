@@ -20,6 +20,7 @@ package org.wso2.carbon.sample.server;
 
 import org.HdrHistogram.Histogram;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,6 +70,10 @@ public class DatabridgeTestServer {
     private static long totalTimeSpent = 0;
     private static long startTime = System.currentTimeMillis();
     private static boolean flag;
+    private static long filterTime = 0;
+    private static long warmupPeriod = 0;
+    private static long fullExperimentTime = 0;
+    private static long timeBeforeWarmup = 0;
     private static long veryFirstTime = System.currentTimeMillis();
     private static Writer fstream = null;
     private static long outputFileTimeStamp;
@@ -80,12 +85,14 @@ public class DatabridgeTestServer {
     BinaryDataReceiver binaryDataReceiver;
     private InMemoryStreamDefinitionStore streamDefinitionStore;
 
-    private static final String STREAM_DEFN = "{'name':'org.wso2.esb.MediatorStatistics', 'version':'1.3.0', "
+    private static final String STREAM_DEFN = "{'name':'inputStream', 'version':'1.0.0', "
             + "'nickName':'Stock Quote Information', 'description':'Some Desc', "
             + "'payloadData':[{'name':'iij_timestamp','type':'LONG'}, {'name':'value','type':'FLOAT'}]}";
 
     public static void main(String args[]) throws DataBridgeException, InterruptedException,
                                                   StreamDefinitionStoreException, MalformedStreamDefinitionException {
+        fullExperimentTime = Long.parseLong(args[3]) * 60000;
+        warmupPeriod = Long.parseLong(args[4]) * 60000;
         try {
             File directory = new File(logDir);
             if (!directory.exists()) {
@@ -169,12 +176,11 @@ public class DatabridgeTestServer {
 
                     try {
 
-                        // We won't consider any data before warmup period
+                        timeBeforeWarmup = System.currentTimeMillis();
+                        filterTime = timeBeforeWarmup - veryFirstTime;
 
 
-                        totalEventCount++;
-
-                        if (totalEventCount > 10000) {
+                        if (filterTime >= warmupPeriod) {
 
                             long currentTime = System.currentTimeMillis();
 
@@ -249,7 +255,7 @@ public class DatabridgeTestServer {
                                 timeSpent = 0;
 
 
-                                if (!exitFlag && totalEventCount == 10000000) {
+                                if (!exitFlag && (currentTime - firstTupleTime) >= fullExperimentTime) {
                                     log.info("Exit flag set");
                                     setCompletedFlag(sequenceNumber);
                                     exitFlag = true;

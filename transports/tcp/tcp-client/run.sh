@@ -18,10 +18,7 @@ CLASSPATH=.:target/classes:target/org.wso2.carbon.sp.parent-4.0.0-SNAPSHOT-jar-w
 JAVA_OPTS="-Xmx8g -Xms8g"
 
 HOST="localhost"
-PORT="7612"
-PROTOCOL='thrift'
+PORT="9892"
 
-FULL_EXPERIMENT_PERIOD=15
-WARM_UP_PERIOD=10
 
-java $JAVA_OPTS -cp $CLASSPATH org.wso2.carbon.sample.server.DatabridgeTestServer $HOST $PORT $PROTOCOL $FULL_EXPERIMENT_PERIOD $WARM_UP_PERIOD 
+java $JAVA_OPTS -cp $CLASSPATH org.wso2.sp.tcp.client.TCPMain $HOST $PORT

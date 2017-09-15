@@ -42,6 +42,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.acl.LastOwnerException;
 
 /**
  * Test Server for TCP source
@@ -59,11 +60,16 @@ public class TCPServer {
     private static long startTime = System.currentTimeMillis();
     private static boolean flag;
     private static boolean firstLineFlag;
+    private static long filterTime = 0;
+    private static long warmupPeriod = 0;
+    private static long fullExperimentTime = 0;
+    private static long timeBeforeWarmup = 0;
     private static long veryFirstTime = System.currentTimeMillis();
     private static Writer fstream = null;
     private static long outputFileTimeStamp;
     private static boolean exitFlag = false;
     private static int sequenceNumber = 0;
+    private static final Histogram throughputHistogram = new Histogram(2);
     private static final Histogram histogram = new Histogram(2);
     private static final Histogram histogram2 = new Histogram(2);
 
@@ -73,7 +79,8 @@ public class TCPServer {
      * @param args host and port are passed as args
      */
     public static void main(String[] args) {
-
+        fullExperimentTime = Long.parseLong(args[2]) * 60000;
+        warmupPeriod = Long.parseLong(args[3]) * 60000;
         try {
             File directory = new File(logDir);
             if (!directory.exists()) {
@@ -118,11 +125,11 @@ public class TCPServer {
                 for (Event event : events) {
                     try {
 
-                        // We won't consider any data before warmup period
-                        totalEventCount++;
+                        timeBeforeWarmup = System.currentTimeMillis();
+                        filterTime = timeBeforeWarmup - veryFirstTime;
 
 
-                        if (totalEventCount > 10000) {
+                        if (filterTime >= warmupPeriod) {
                             long currentTime = System.currentTimeMillis();
 
                             if (firstTupleTime == -1) {
@@ -148,7 +155,7 @@ public class TCPServer {
                                 histogram2.recordValue((timeSpent) / eventCount);
                                 histogram.recordValue((totalTimeSpent) / eventCountTotal);
                                 throughputHistogram.recordValue(eventCount * 1000 / value);
-                                totalEvtsPerRun += eventCount * 1000 / value;
+                                // totalEvtsPerRun += eventCount * 1000 / value;
 
                                 if (!flag) {
                                     flag = true;
@@ -225,7 +232,7 @@ public class TCPServer {
                                 timeSpent = 0;
 
 
-                                if (!exitFlag && totalEventCount == 10000000) {
+                                if (!exitFlag && (currentTime - firstTupleTime) >= fullExperimentTime) {
                                     log.info("Exit flag set");
                                     setCompletedFlag(sequenceNumber);
                                     exitFlag = true;
@@ -238,8 +245,10 @@ public class TCPServer {
                             }
 
                         }
-                    } catch (Exception ex) {
+                    } catch (RuntimeException ex) {
                         log.error("Error while consuming event" + ex.getMessage(), ex);
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
                     }
                 }
                 log.info(events.length);
