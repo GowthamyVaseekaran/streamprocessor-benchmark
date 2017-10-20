@@ -19,7 +19,7 @@ data.agent.config:
     # Data agent configurations
     # THIS IS A MANDATORY FIELD
   agents:
-  -
+  - 
       # Data agent configuration
     agentConfiguration:
         # Data agent name
@@ -39,11 +39,11 @@ data.agent.config:
         # Batch Size
       batchSize: 200
         # Core pool size
-      corePoolSize: 1
+      corePoolSize: 8
         # Socket timeout in milliseconds
       socketTimeoutMS: 30000
         # Maximum pool size
-      maxPoolSize: 1
+      maxPoolSize: 8
         # Keep alive time in pool
       keepAliveTimeInPool: 20
         # Reconnection interval
@@ -68,7 +68,7 @@ data.agent.config:
       sslEnabledProtocols: TLSv1,TLSv1.1,TLSv1.2
         # Ciphers
       ciphers: SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_DSS_WITH_AES_128_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA
-  -
+  - 
       # Data agent configuration
     agentConfiguration:
         # Data agent name
@@ -88,11 +88,11 @@ data.agent.config:
         # Batch Size
       batchSize: 200
         # Core pool size
-      corePoolSize: 1
+      corePoolSize: 5
         # Socket timeout in milliseconds
       socketTimeoutMS: 30000
         # Maximum pool size
-      maxPoolSize: 1
+      maxPoolSize: 10
         # Keep alive time in pool
       keepAliveTimeInPool: 20
         # Reconnection interval
@@ -117,12 +117,13 @@ data.agent.config:
       sslEnabledProtocols: TLSv1,TLSv1.1,TLSv1.2
         # Ciphers
       ciphers: SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_DSS_WITH_AES_128_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA
+
 wso2.securevault:
   secretRepository:
     type: org.wso2.carbon.secvault.repository.DefaultSecretRepository
     parameters:
       privateKeyAlias: wso2carbon
-      keystoreLocation: src/main/resources/wso2carbon.jks
+      keystoreLocation: src/main/resources/securevault.jks
       secretPropertiesFile: src/main/resources/secrets.properties
   masterKeyReader:
     type: org.wso2.carbon.secvault.reader.DefaultMasterKeyReader

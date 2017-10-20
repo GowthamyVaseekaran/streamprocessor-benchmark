@@ -29,9 +29,8 @@ public class DataPublisherUtil {
         File filePath = new File("src" + File.separator + "main" + File.separator + "resources");
         if (!filePath.exists()) {
             filePath = new File("modules" + File.separator + "samples" + File.separator +
-                                        "sample-clients" + File.separator + "wso2event-client" + File.separator + "src"
-                                        +
-                                        File.separator + "main" + File.separator + "resources");
+                    "sample-clients" + File.separator + "wso2event-client" + File.separator + "src" +
+                    File.separator + "main" + File.separator + "resources");
         }
         if (!filePath.exists()) {
             filePath = new File("resources");
@@ -42,15 +41,15 @@ public class DataPublisherUtil {
         String trustStore = filePath.getAbsolutePath();
         System.setProperty("javax.net.ssl.trustStore", trustStore + File.separator + "client-truststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+
     }
 
     public static void setKeyStoreParams() {
         File filePath = new File("src" + File.separator + "main" + File.separator + "resources");
         if (!filePath.exists()) {
             filePath = new File("modules" + File.separator + "samples" + File.separator +
-                                        "sample-clients" + File.separator + "wso2event-client" + File.separator + "src"
-                                        +
-                                        File.separator + "main" + File.separator + "resources");
+                    "sample-clients" + File.separator + "wso2event-client" + File.separator + "src" +
+                    File.separator + "main" + File.separator + "resources");
         }
         if (!filePath.exists()) {
             filePath = new File("resources");
@@ -67,9 +66,8 @@ public class DataPublisherUtil {
         File filePath = new File("src" + File.separator + "main" + File.separator + "resources");
         if (!filePath.exists()) {
             filePath = new File("modules" + File.separator + "samples" + File.separator +
-                                        "sample-clients" + File.separator + "wso2event-client" + File.separator + "src"
-                                        +
-                                        File.separator + "main" + File.separator + "resources");
+                    "sample-clients" + File.separator + "wso2event-client" + File.separator + "src" +
+                    File.separator + "main" + File.separator + "resources");
         }
         if (!filePath.exists()) {
             filePath = new File("resources");

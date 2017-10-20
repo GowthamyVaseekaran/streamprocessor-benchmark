@@ -19,7 +19,7 @@ data.agent.config:
     # Data agent configurations
     # THIS IS A MANDATORY FIELD
   agents:
-  -
+  - 
       # Data agent configuration
     agentConfiguration:
         # Data agent name
@@ -39,11 +39,11 @@ data.agent.config:
         # Batch Size
       batchSize: 200
         # Core pool size
-      corePoolSize: 1
+      corePoolSize: 5
         # Socket timeout in milliseconds
       socketTimeoutMS: 30000
         # Maximum pool size
-      maxPoolSize: 1
+      maxPoolSize: 10
         # Keep alive time in pool
       keepAliveTimeInPool: 20
         # Reconnection interval
@@ -68,7 +68,7 @@ data.agent.config:
       sslEnabledProtocols: ''
         # Ciphers
       ciphers: ''
-  -
+  - 
       # Data agent configuration
     agentConfiguration:
         # Data agent name
@@ -88,11 +88,11 @@ data.agent.config:
         # Batch Size
       batchSize: 200
         # Core pool size
-      corePoolSize: 1
+      corePoolSize: 5
         # Socket timeout in milliseconds
       socketTimeoutMS: 30000
         # Maximum pool size
-      maxPoolSize: 1
+      maxPoolSize: 10
         # Keep alive time in pool
       keepAliveTimeInPool: 20
         # Reconnection interval
@@ -123,7 +123,7 @@ wso2.securevault:
     type: org.wso2.carbon.secvault.repository.DefaultSecretRepository
     parameters:
       privateKeyAlias: wso2carbon
-      keystoreLocation: src/main/resources/wso2carbon.jks
+      keystoreLocation: src/main/resources/securevault.jks
       secretPropertiesFile: src/main/resources/secrets.properties
   masterKeyReader:
     type: org.wso2.carbon.secvault.reader.DefaultMasterKeyReader

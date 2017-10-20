@@ -37,17 +37,13 @@ public class Client {
     private static Log log = LogFactory.getLog(Client.class);
     private static final String STREAM_ID = "inStream:1.0.0";
     private static String agentConfigFileName = "data.agent.config.yaml";
-   // private static int BatchSize = 600000;
     private static int BatchSize = 1200000;
-    //private static int BatchSize = 262150;
     private static long startTime = 0;
 
     public static void main(String[] args) {
 
         DataPublisherUtil.setKeyStoreParams();
         DataPublisherUtil.setTrustStoreParams();
-
-        // log.info(Arrays.deepToString(args));
 
         String protocol = args[0];
         String host = args[1];
@@ -70,42 +66,35 @@ public class Client {
             event.setMetaData(null);
             event.setCorrelationData(null);
 
-
             long numberOfEventsSent = 100000000L;
             long iijtimestamp;
             float value;
 
             int q = 0;
-            int p=0;
+            int p = 0;
 
             for (long i = 0; i < numberOfEventsSent; i += BatchSize) {
                 startTime = System.currentTimeMillis();
 
-                //log.info("start time"+startTime);
-                //  List<Event> eventList = new ArrayList<Event>(BatchSize);
                 for (int j = 0; j < BatchSize; j++) {
                     event.setPayloadData(new Object[]{System.currentTimeMillis(), rand.nextFloat()});
-                    //  eventList.add(event);
                     long time = System.currentTimeMillis();
                     if (time - startTime <= 2000) {
                         dataPublisher.publish(event);
-                        //log.info(e);
-                            p++;
-                            q++;
+                        p++;
+                        q++;
                     } else {
 
 
                     }
-		    
 
 
                 }
-		log.info("p is"+p);
-		p=0;
+                log.info("p is" + p);
+                p = 0;
                 long currentTime = System.currentTimeMillis();
-		
-		log.info("q is"+q);
-               // log.info(2000 - (currentTime - startTime));
+
+                log.info("q is" + q);
 
                 if (currentTime - startTime <= 2000) {
                     Thread.sleep(2000 - (currentTime - startTime));
